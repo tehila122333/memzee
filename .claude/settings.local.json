@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version && npm --version 2>/dev/null)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebFetch(domain:clerk.com)",
+      "WebSearch",
+      "WebFetch(domain:www.buildwithmatija.com)",
+      "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff/memzee\" && npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack --yes 2>&1)",
+      "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff\" && npx create-next-app@latest memzee-scaffold --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack --yes 2>&1)",
+      "Bash(echo COPY_DONE:*)",
+      "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff/memzee\" && npm install @clerk/nextjs @aws-sdk/client-s3 @aws-sdk/s3-request-presigner nanoid lucide-react date-fns clsx tailwind-merge 2>&1)",
+      "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff/memzee\" && npm run build 2>&1)",
+      "Bash(cd:*)"
+    ]
+  }
+}
