@@ -11,9 +11,11 @@ interface Props {
   view: FileView;
   onClick: () => void;
   onRefresh: () => void;
+  selected: boolean;
+  onSelect: () => void;
 }
 
-export default function FileCard({ file, view, onClick, onRefresh }: Props) {
+export default function FileCard({ file, view, onClick, onRefresh, selected, onSelect }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
@@ -66,9 +68,29 @@ export default function FileCard({ file, view, onClick, onRefresh }: Props) {
   return (
     <div
       ref={ref}
-      className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+      className={`group relative cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md ${
+        selected ? "border-blue-400 ring-2 ring-blue-300" : "border-gray-200"
+      }`}
       onClick={onClick}
     >
+      {/* Checkbox */}
+      <div
+        className={`absolute left-1.5 top-1.5 z-10 transition-opacity ${
+          selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect();
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => {}}
+          className="h-4 w-4 cursor-pointer accent-blue-600 shadow"
+        />
+      </div>
+
       {/* Thumbnail / Icon area */}
       <div className="flex h-36 items-center justify-center bg-gray-100">
         {thumbnailUrl ? (

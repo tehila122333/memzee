@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { X, Download, Trash2, RotateCcw } from "lucide-react";
+import { X, Download, Trash2, RotateCcw, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatBytes } from "@/lib/file-utils";
 import { isImage, isVideo } from "@/lib/file-utils";
 import LightboxImage from "./LightboxImage";
@@ -11,19 +11,37 @@ import type { FileRecord, FileView } from "@/types";
 
 interface Props {
   file: FileRecord;
+  files: FileRecord[];
+  selectedIndex: number;
   view: FileView;
   onClose: () => void;
   onDelete: () => void;
+  onPrev: () => void;
+  onNext: () => void;
 }
 
-export default function Lightbox({ file, view, onClose, onDelete }: Props) {
+export default function Lightbox({
+  file,
+  files,
+  selectedIndex,
+  view,
+  onClose,
+  onDelete,
+  onPrev,
+  onNext,
+}: Props) {
+  const hasPrev = selectedIndex > 0;
+  const hasNext = selectedIndex < files.length - 1;
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft" && hasPrev) onPrev();
+      if (e.key === "ArrowRight" && hasNext) onNext();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [onClose, onPrev, onNext, hasPrev, hasNext]);
 
   const handleDownload = async () => {
     const res = await fetch(`/api/files/${file.id}/download`);
@@ -32,6 +50,26 @@ export default function Lightbox({ file, view, onClose, onDelete }: Props) {
     a.href = data.url;
     a.download = file.original_name;
     a.click();
+  };
+
+  const handleShare = async () => {
+    if (!navigator.share && !navigator.canShare) {
+      handleDownload();
+      return;
+    }
+    try {
+      const res = await fetch(`/api/files/${file.id}/download`);
+      const data = await res.json();
+      const blob = await fetch(data.url).then((r) => r.blob());
+      const shareFile = new File([blob], file.original_name, { type: file.mime_type });
+      if (navigator.canShare?.({ files: [shareFile] })) {
+        await navigator.share({ files: [shareFile], title: file.original_name });
+      } else {
+        handleDownload();
+      }
+    } catch {
+      handleDownload();
+    }
   };
 
   const handleDelete = async () => {
@@ -61,9 +99,16 @@ export default function Lightbox({ file, view, onClose, onDelete }: Props) {
           <p className="truncate text-sm font-medium text-white">{file.original_name}</p>
           <p className="text-xs text-gray-400">{formatBytes(file.size_bytes)}</p>
         </div>
-        <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+        <div className="ml-4 flex flex-shrink-0 items-center gap-2">
           {view !== "trash" && (
             <>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white hover:bg-white/20"
+              >
+                <Share2 className="h-4 w-4" />
+                Share
+              </button>
               <button
                 onClick={handleDownload}
                 className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white hover:bg-white/20"
@@ -107,8 +152,17 @@ export default function Lightbox({ file, view, onClose, onDelete }: Props) {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex flex-1 items-center justify-center overflow-hidden p-4">
+      {/* Content with prev/next arrows */}
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
+        {hasPrev && (
+          <button
+            onClick={onPrev}
+            className="absolute left-4 z-10 rounded-full bg-black/40 p-2 text-white hover:bg-black/60"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+        )}
+
         {isImage(file.mime_type) ? (
           <LightboxImage fileId={file.id} />
         ) : isVideo(file.mime_type) ? (
@@ -119,6 +173,15 @@ export default function Lightbox({ file, view, onClose, onDelete }: Props) {
             mimeType={file.mime_type}
             fileName={file.original_name}
           />
+        )}
+
+        {hasNext && (
+          <button
+            onClick={onNext}
+            className="absolute right-4 z-10 rounded-full bg-black/40 p-2 text-white hover:bg-black/60"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
         )}
       </div>
     </div>

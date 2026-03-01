@@ -11,6 +11,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const view = (searchParams.get("view") ?? "all") as FileView;
+  const folderId = searchParams.get("folderId");
 
   let sql: string;
   const params: (string | null)[] = [`${userId}/%`];
@@ -23,6 +24,9 @@ export async function GET(request: Request) {
     sql = `SELECT * FROM files WHERE storage_key LIKE ? AND deleted_at IS NULL AND mime_type LIKE 'video/%' ORDER BY uploaded_at DESC`;
   } else if (view === "documents") {
     sql = `SELECT * FROM files WHERE storage_key LIKE ? AND deleted_at IS NULL AND (mime_type LIKE 'application/pdf%' OR mime_type LIKE 'text/%' OR mime_type LIKE '%document%' OR mime_type LIKE '%spreadsheet%' OR mime_type LIKE '%presentation%') ORDER BY uploaded_at DESC`;
+  } else if (view === "folder" && folderId) {
+    sql = `SELECT * FROM files WHERE storage_key LIKE ? AND folder_id = ? AND deleted_at IS NULL ORDER BY uploaded_at DESC`;
+    params.push(folderId);
   } else {
     sql = `SELECT * FROM files WHERE storage_key LIKE ? AND deleted_at IS NULL ORDER BY uploaded_at DESC`;
   }

@@ -7,6 +7,7 @@ const labels: Record<FileView, string> = {
   videos: "No videos yet",
   documents: "No documents yet",
   trash: "Trash is empty",
+  folder: "This folder is empty",
 };
 
 const subtitles: Record<FileView, string> = {
@@ -15,6 +16,7 @@ const subtitles: Record<FileView, string> = {
   videos: "Upload videos to see them here.",
   documents: "Upload documents to see them here.",
   trash: "Deleted files will appear here.",
+  folder: "Upload or drag files into this folder.",
 };
 
 export default function EmptyState({ view }: { view: FileView }) {

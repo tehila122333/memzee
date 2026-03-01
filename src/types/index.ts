@@ -1,4 +1,4 @@
-export type FileView = "all" | "photos" | "videos" | "documents" | "trash";
+export type FileView = "all" | "photos" | "videos" | "documents" | "trash" | "folder";
 
 export interface FileRecord {
   id: string;
@@ -13,11 +13,25 @@ export interface FileRecord {
   deleted_at: string | null;
 }
 
-export interface UploadState {
-  status: "idle" | "requesting" | "uploading" | "confirming" | "done" | "error";
+export interface FolderRecord {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  owner_key: string;
+  created_at: string;
+}
+
+export interface FileUploadState {
+  localId: string;
+  fileName: string;
+  status: "pending" | "uploading" | "done" | "error";
   progress: number;
-  fileName?: string;
   error?: string;
+}
+
+export interface UploadState {
+  files: FileUploadState[];
+  isOpen: boolean;
 }
 
 export interface PresignedUploadResponse {
