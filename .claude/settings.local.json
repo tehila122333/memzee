@@ -11,7 +11,13 @@
       "Bash(echo COPY_DONE:*)",
       "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff/memzee\" && npm install @clerk/nextjs @aws-sdk/client-s3 @aws-sdk/s3-request-presigner nanoid lucide-react date-fns clsx tailwind-merge 2>&1)",
       "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff/memzee\" && npm run build 2>&1)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(cd \"C:/Users/User/OneDrive/שולחן העבודה/stuff/memzee\" && gh repo create memzee --public --description \"Personal cloud storage with Google Photos-style UI\" --source . --remote origin --push 2>&1)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(netstat -ano)",
+      "Bash(xargs -I {} taskkill //PID {} //F)",
+      "Bash(npm install:*)"
     ]
   }
 }

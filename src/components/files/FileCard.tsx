@@ -40,11 +40,12 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
   useEffect(() => {
     if (!visible || !isImage(file.mime_type)) return;
 
-    fetch(`/api/files/${file.id}/download?preview=true`)
+    const param = file.thumbnail_key ? "thumbnail=true" : "preview=true";
+    fetch(`/api/files/${file.id}/download?${param}`)
       .then((r) => r.json())
       .then((d) => setThumbnailUrl(d.url))
       .catch(() => {});
-  }, [visible, file.id, file.mime_type]);
+  }, [visible, file.id, file.mime_type, file.thumbnail_key]);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -68,8 +69,10 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
   return (
     <div
       ref={ref}
-      className={`group relative cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md ${
-        selected ? "border-blue-400 ring-2 ring-blue-300" : "border-gray-200"
+      className={`group relative cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md dark:bg-gray-800 dark:hover:shadow-gray-700/40 ${
+        selected
+          ? "border-blue-400 ring-2 ring-blue-300 dark:border-blue-500 dark:ring-blue-700"
+          : "border-gray-200 dark:border-gray-700"
       }`}
       onClick={onClick}
     >
@@ -92,7 +95,7 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
       </div>
 
       {/* Thumbnail / Icon area */}
-      <div className="flex h-36 items-center justify-center bg-gray-100">
+      <div className="flex h-36 items-center justify-center bg-gray-100 dark:bg-gray-700">
         {thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -101,16 +104,16 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
             className="h-full w-full object-cover"
           />
         ) : (
-          <FileIcon mimeType={file.mime_type} className="h-12 w-12 text-gray-400" />
+          <FileIcon mimeType={file.mime_type} className="h-12 w-12 text-gray-400 dark:text-gray-500" />
         )}
       </div>
 
       {/* Info */}
       <div className="p-2">
-        <p className="truncate text-xs font-medium text-gray-900" title={file.original_name}>
+        <p className="truncate text-xs font-medium text-gray-900 dark:text-gray-100" title={file.original_name}>
           {file.original_name}
         </p>
-        <p className="text-xs text-gray-400">{formatBytes(file.size_bytes)}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{formatBytes(file.size_bytes)}</p>
       </div>
 
       {/* Actions overlay */}
@@ -119,14 +122,14 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
           <>
             <button
               onClick={handleRestore}
-              className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-green-700 shadow hover:bg-green-50"
+              className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-green-700 shadow hover:bg-green-50 dark:bg-gray-900/90 dark:text-green-400 dark:hover:bg-green-900/30"
               title="Restore"
             >
               Restore
             </button>
             <button
               onClick={handlePermDelete}
-              className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-700 shadow hover:bg-red-50"
+              className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-700 shadow hover:bg-red-50 dark:bg-gray-900/90 dark:text-red-400 dark:hover:bg-red-900/30"
               title="Delete permanently"
             >
               Delete
@@ -135,7 +138,7 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
         ) : (
           <button
             onClick={handleDelete}
-            className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-600 shadow hover:bg-red-50"
+            className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-600 shadow hover:bg-red-50 dark:bg-gray-900/90 dark:text-red-400 dark:hover:bg-red-900/30"
             title="Move to trash"
           >
             ✕

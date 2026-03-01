@@ -4,6 +4,28 @@ import { createContext, useContext, useState, useCallback, useRef, ReactNode } f
 import type { UploadState, FileUploadState } from "@/types";
 import UploadProgress from "./UploadProgress";
 
+async function generateThumbnailBlob(file: File, maxSize = 400): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(null); return; }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob((blob) => resolve(blob), "image/webp", 0.75);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
 interface UploadContextType {
   uploadState: UploadState;
   uploadFiles: (files: File[], folderId?: string | null) => void;
@@ -62,7 +84,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
           });
 
           if (!presignedRes.ok) throw new Error("Failed to get upload URL");
-          const { uploadUrl, storageKey, fileId } = await presignedRes.json();
+          const { uploadUrl, storageKey, fileId, thumbnailUploadUrl, thumbnailKey } = await presignedRes.json();
 
           await new Promise<void>((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -84,6 +106,21 @@ export function UploadProvider({ children }: { children: ReactNode }) {
             xhr.send(file);
           });
 
+          // Upload thumbnail for images
+          if (thumbnailUploadUrl && thumbnailKey && file.type.startsWith("image/")) {
+            const thumbBlob = await generateThumbnailBlob(file);
+            if (thumbBlob) {
+              await new Promise<void>((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("PUT", thumbnailUploadUrl);
+                xhr.setRequestHeader("Content-Type", "image/webp");
+                xhr.onload = () => resolve();
+                xhr.onerror = () => resolve(); // non-fatal
+                xhr.send(thumbBlob);
+              });
+            }
+          }
+
           const confirmRes = await fetch("/api/upload/confirm", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -94,6 +131,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
               mimeType: file.type || "application/octet-stream",
               sizeBytes: file.size,
               folderId: folderId ?? null,
+              thumbnailKey: thumbnailKey ?? null,
             }),
           });
 

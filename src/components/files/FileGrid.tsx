@@ -25,9 +25,9 @@ export default function FileGrid({
 }: Props) {
   if (viewMode === "list") {
     return (
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+          <thead className="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400">
             <tr>
               <th className="w-8 px-3 py-2" />
               <th className="px-3 py-2">Name</th>

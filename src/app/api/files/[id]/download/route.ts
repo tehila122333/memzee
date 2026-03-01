@@ -16,6 +16,7 @@ export async function GET(
   const { id } = await params;
   const { searchParams } = new URL(request.url);
   const preview = searchParams.get("preview") === "true";
+  const thumbnail = searchParams.get("thumbnail") === "true";
 
   const rows = await queryD1<FileRecord>(
     `SELECT * FROM files WHERE id = ? AND storage_key LIKE ?`,
@@ -27,9 +28,14 @@ export async function GET(
   }
 
   const file = rows[0];
-  const url = preview
-    ? await generatePreviewPresignedUrl(file.storage_key)
-    : await generateDownloadPresignedUrl(file.storage_key, file.original_name);
+  let url: string;
+  if (thumbnail && file.thumbnail_key) {
+    url = await generatePreviewPresignedUrl(file.thumbnail_key);
+  } else if (preview) {
+    url = await generatePreviewPresignedUrl(file.storage_key);
+  } else {
+    url = await generateDownloadPresignedUrl(file.storage_key, file.original_name);
+  }
 
   return NextResponse.json({ url });
 }

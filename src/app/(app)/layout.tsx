@@ -3,12 +3,14 @@ import DropZone from "@/components/upload/DropZone";
 import PasteUploadHandler from "@/components/upload/PasteUploadHandler";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import KeyboardShortcuts from "@/components/layout/KeyboardShortcuts";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <UploadProvider>
       <PasteUploadHandler />
-      <div className="flex h-screen bg-gray-50">
+      <KeyboardShortcuts />
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />

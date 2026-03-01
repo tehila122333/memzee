@@ -21,5 +21,12 @@ export async function POST(request: Request) {
   const fileId = nanoid();
   const uploadUrl = await generateUploadPresignedUrl(storageKey, contentType);
 
-  return NextResponse.json({ uploadUrl, storageKey, fileId });
+  let thumbnailUploadUrl: string | undefined;
+  let thumbnailKey: string | undefined;
+  if (contentType.startsWith("image/")) {
+    thumbnailKey = `thumbnails/${userId}/${fileId}.webp`;
+    thumbnailUploadUrl = await generateUploadPresignedUrl(thumbnailKey, "image/webp");
+  }
+
+  return NextResponse.json({ uploadUrl, storageKey, fileId, thumbnailUploadUrl, thumbnailKey });
 }

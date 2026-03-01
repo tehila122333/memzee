@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "@/components/theme/ThemeContext";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased">{children}</body>
+      <html lang="en" suppressHydrationWarning>
+        <body className="antialiased">
+          <ThemeProvider>{children}</ThemeProvider>
+        </body>
       </html>
     </ClerkProvider>
   );

@@ -108,11 +108,11 @@ export default function Sidebar() {
   const usedPct = storage ? Math.min(100, (storage.used / storage.total) * 100) : 0;
 
   return (
-    <aside className="flex w-56 flex-shrink-0 flex-col border-r border-gray-200 bg-white">
+    <aside className="flex w-56 flex-shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
       {/* Logo */}
-      <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-5">
+      <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-5 dark:border-gray-700">
         <Cloud className="h-6 w-6 text-blue-600" />
-        <span className="text-lg font-bold text-gray-900">Memzee</span>
+        <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Memzee</span>
       </div>
 
       <div className="flex flex-1 flex-col overflow-y-auto p-3">
@@ -125,8 +125,8 @@ export default function Sidebar() {
               className={clsx(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 pathname === href || pathname.startsWith(href + "/")
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
               )}
             >
               <Icon className="h-4 w-4" />
@@ -138,13 +138,13 @@ export default function Sidebar() {
         {/* Folders section */}
         <div className="mt-4">
           <div className="flex items-center justify-between px-3 py-1">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
               Folders
             </span>
             <button
               onClick={() => setShowNewFolder((v) => !v)}
               title="New folder"
-              className="rounded p-0.5 text-gray-400 hover:text-blue-600"
+              className="rounded p-0.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
             >
               <FolderPlus className="h-3.5 w-3.5" />
             </button>
@@ -154,7 +154,7 @@ export default function Sidebar() {
             <div className="mt-1 flex items-center gap-1 px-2">
               <input
                 autoFocus
-                className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 placeholder="Folder name"
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
@@ -182,7 +182,7 @@ export default function Sidebar() {
                   <div className="flex flex-1 items-center gap-1">
                     <input
                       autoFocus
-                      className="min-w-0 flex-1 rounded border border-gray-300 px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="min-w-0 flex-1 rounded border border-gray-300 px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
                       onKeyDown={(e) => {
@@ -204,8 +204,8 @@ export default function Sidebar() {
                       className={clsx(
                         "flex min-w-0 flex-1 items-center gap-2 text-sm transition-colors",
                         pathname === `/folders/${folder.id}`
-                          ? "font-medium text-blue-700"
-                          : "text-gray-600 hover:text-gray-900"
+                          ? "font-medium text-blue-700 dark:text-blue-400"
+                          : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
                       )}
                     >
                       <Folder className="h-4 w-4 flex-shrink-0 text-blue-400" />
@@ -214,7 +214,7 @@ export default function Sidebar() {
                     <div className="hidden shrink-0 items-center gap-0.5 group-hover:flex">
                       <button
                         onClick={() => { setEditingId(folder.id); setEditingName(folder.name); }}
-                        className="rounded p-0.5 text-gray-400 hover:text-gray-600"
+                        className="rounded p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         title="Rename"
                       >
                         <Pencil className="h-3 w-3" />
@@ -232,7 +232,7 @@ export default function Sidebar() {
               </div>
             ))}
             {folders.length === 0 && !showNewFolder && (
-              <p className="px-3 py-1 text-xs text-gray-400">No folders yet</p>
+              <p className="px-3 py-1 text-xs text-gray-400 dark:text-gray-500">No folders yet</p>
             )}
           </div>
         </div>
@@ -240,14 +240,14 @@ export default function Sidebar() {
 
       {/* Storage bar */}
       {storage !== null && (
-        <div className="border-t border-gray-100 px-4 py-3">
-          <div className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+        <div className="border-t border-gray-100 px-4 py-3 dark:border-gray-700">
+          <div className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <div
               className="h-1.5 rounded-full bg-blue-500 transition-all"
               style={{ width: `${usedPct}%` }}
             />
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {formatBytes(storage.used)} of {formatBytes(storage.total)} used
           </p>
         </div>

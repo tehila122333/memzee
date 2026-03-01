@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { LayoutGrid, List } from "lucide-react";
 import FileGrid from "./FileGrid";
 import Lightbox from "./Lightbox";
@@ -16,34 +16,94 @@ interface Props {
 export default function FileView({ view, folderId }: Props) {
   const [files, setFiles] = useState<FileRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const fetchFiles = useCallback(async () => {
-    setLoading(true);
-    try {
+  const buildUrl = useCallback(
+    (cursor?: string | null, q?: string) => {
       let url = `/api/files?view=${view}`;
       if (folderId) url += `&folderId=${encodeURIComponent(folderId)}`;
-      const res = await fetch(url);
+      if (q) url += `&q=${encodeURIComponent(q)}`;
+      if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+      return url;
+    },
+    [view, folderId]
+  );
+
+  const fetchFiles = useCallback(
+    async (q = searchQuery) => {
+      setLoading(true);
+      setNextCursor(null);
+      setHasMore(false);
+      try {
+        const res = await fetch(buildUrl(null, q));
+        const data = await res.json();
+        setFiles(data.files ?? []);
+        setHasMore(data.hasMore ?? false);
+        setNextCursor(data.nextCursor ?? null);
+      } catch {
+        setFiles([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [buildUrl, searchQuery]
+  );
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || !nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(buildUrl(nextCursor, searchQuery));
       const data = await res.json();
-      setFiles(data.files ?? []);
+      setFiles((prev) => [...prev, ...(data.files ?? [])]);
+      setHasMore(data.hasMore ?? false);
+      setNextCursor(data.nextCursor ?? null);
     } catch {
-      setFiles([]);
+      // ignore
     } finally {
-      setLoading(false);
+      setLoadingMore(false);
     }
-  }, [view, folderId]);
+  }, [hasMore, nextCursor, loadingMore, buildUrl, searchQuery]);
 
   useEffect(() => {
     fetchFiles();
-  }, [fetchFiles]);
+  }, [view, folderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handler = () => fetchFiles();
     window.addEventListener("memzee:upload-done", handler);
     return () => window.removeEventListener("memzee:upload-done", handler);
   }, [fetchFiles]);
+
+  // Listen for search events from Header
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const q = (e as CustomEvent<{ q: string }>).detail.q;
+      setSearchQuery(q);
+      fetchFiles(q);
+    };
+    window.addEventListener("memzee:search", handler as EventListener);
+    return () => window.removeEventListener("memzee:search", handler as EventListener);
+  }, [fetchFiles]);
+
+  // IntersectionObserver for infinite scroll sentinel
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   const handleSelectToggle = (id: string) => {
     setSelectedIds((prev) => {
@@ -76,8 +136,9 @@ export default function FileView({ view, folderId }: Props) {
       {/* Header row: count + view toggle */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {files.length} item{files.length !== 1 ? "s" : ""}
+            {searchQuery && <span className="ml-1 text-blue-600">· &quot;{searchQuery}&quot;</span>}
           </p>
           {selectedIds.size > 0 && (
             <p className="text-sm text-blue-600">· {selectedIds.size} selected</p>
@@ -89,8 +150,8 @@ export default function FileView({ view, folderId }: Props) {
             title="Grid view"
             className={`rounded p-1.5 transition ${
               viewMode === "grid"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-400 hover:text-gray-600"
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             <LayoutGrid className="h-4 w-4" />
@@ -100,8 +161,8 @@ export default function FileView({ view, folderId }: Props) {
             title="List view"
             className={`rounded p-1.5 transition ${
               viewMode === "list"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-400 hover:text-gray-600"
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             <List className="h-4 w-4" />
@@ -122,15 +183,24 @@ export default function FileView({ view, folderId }: Props) {
       {files.length === 0 ? (
         <EmptyState view={view} />
       ) : (
-        <FileGrid
-          files={files}
-          view={view}
-          viewMode={viewMode}
-          onSelect={openLightbox}
-          onRefresh={fetchFiles}
-          selectedIds={selectedIds}
-          onSelectToggle={handleSelectToggle}
-        />
+        <>
+          <FileGrid
+            files={files}
+            view={view}
+            viewMode={viewMode}
+            onSelect={openLightbox}
+            onRefresh={fetchFiles}
+            selectedIds={selectedIds}
+            onSelectToggle={handleSelectToggle}
+          />
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-8" />
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+            </div>
+          )}
+        </>
       )}
 
       {/* Lightbox */}

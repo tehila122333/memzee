@@ -22,9 +22,9 @@ const subtitles: Record<FileView, string> = {
 export default function EmptyState({ view }: { view: FileView }) {
   return (
     <div className="flex h-64 flex-col items-center justify-center gap-3 text-center">
-      <Cloud className="h-14 w-14 text-gray-300" />
-      <h2 className="text-lg font-semibold text-gray-600">{labels[view]}</h2>
-      <p className="text-sm text-gray-400">{subtitles[view]}</p>
+      <Cloud className="h-14 w-14 text-gray-300 dark:text-gray-600" />
+      <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-300">{labels[view]}</h2>
+      <p className="text-sm text-gray-400 dark:text-gray-500">{subtitles[view]}</p>
     </div>
   );
 }

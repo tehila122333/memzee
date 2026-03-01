@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { fileId, storageKey, originalName, mimeType, sizeBytes, folderId } = body;
+  const { fileId, storageKey, originalName, mimeType, sizeBytes, folderId, thumbnailKey } = body;
 
   if (!fileId || !storageKey || !originalName || !mimeType || !sizeBytes) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -20,9 +20,9 @@ export async function POST(request: Request) {
   }
 
   await mutateD1(
-    `INSERT INTO files (id, storage_key, original_name, mime_type, size_bytes, folder_id)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [fileId, storageKey, originalName, mimeType, sizeBytes, folderId ?? null]
+    `INSERT INTO files (id, storage_key, thumbnail_key, original_name, mime_type, size_bytes, folder_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [fileId, storageKey, thumbnailKey ?? null, originalName, mimeType, sizeBytes, folderId ?? null]
   );
 
   return NextResponse.json({ success: true, fileId });

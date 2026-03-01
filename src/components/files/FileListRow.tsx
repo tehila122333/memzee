@@ -35,7 +35,9 @@ export default function FileListRow({ file, view, onClick, onRefresh, selected, 
 
   return (
     <tr
-      className={`cursor-pointer border-b border-gray-100 hover:bg-gray-50 ${selected ? "bg-blue-50" : ""}`}
+      className={`cursor-pointer border-b border-gray-100 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 ${
+        selected ? "bg-blue-50 dark:bg-blue-900/20" : ""
+      }`}
       onClick={onClick}
     >
       <td className="px-3 py-2" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
@@ -48,19 +50,19 @@ export default function FileListRow({ file, view, onClick, onRefresh, selected, 
       </td>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <FileIcon mimeType={file.mime_type} className="h-5 w-5 flex-shrink-0 text-gray-400" />
-          <span className="truncate text-sm text-gray-900 max-w-xs" title={file.original_name}>
+          <FileIcon mimeType={file.mime_type} className="h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+          <span className="truncate text-sm text-gray-900 dark:text-gray-100 max-w-xs" title={file.original_name}>
             {file.original_name}
           </span>
         </div>
       </td>
-      <td className="px-3 py-2 text-sm text-gray-500 whitespace-nowrap">
+      <td className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
         {formatBytes(file.size_bytes)}
       </td>
-      <td className="hidden px-3 py-2 text-sm text-gray-500 md:table-cell">
+      <td className="hidden px-3 py-2 text-sm text-gray-500 dark:text-gray-400 md:table-cell">
         {file.mime_type.split("/")[1]?.toUpperCase() ?? file.mime_type}
       </td>
-      <td className="hidden px-3 py-2 text-sm text-gray-500 md:table-cell whitespace-nowrap">
+      <td className="hidden px-3 py-2 text-sm text-gray-500 dark:text-gray-400 md:table-cell whitespace-nowrap">
         {new Date(file.uploaded_at).toLocaleDateString()}
       </td>
       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
@@ -69,13 +71,13 @@ export default function FileListRow({ file, view, onClick, onRefresh, selected, 
             <>
               <button
                 onClick={handleRestore}
-                className="rounded px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+                className="rounded px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/30"
               >
                 Restore
               </button>
               <button
                 onClick={handlePermDelete}
-                className="rounded px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                className="rounded px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
               >
                 Delete
               </button>
@@ -83,7 +85,7 @@ export default function FileListRow({ file, view, onClick, onRefresh, selected, 
           ) : (
             <button
               onClick={handleDelete}
-              className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
             >
               ✕
             </button>
