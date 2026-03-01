@@ -17,11 +17,13 @@ interface Props {
 
 export default function FileCard({ file, view, onClick, onRefresh, selected, onSelect }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  // Use pre-generated URL from listing if available, otherwise lazy-fetch
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(file.preview_url ?? null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!isImage(file.mime_type)) return;
+    // Already have the URL from the listing response — no need to fetch
+    if (file.preview_url || !isImage(file.mime_type)) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -35,17 +37,17 @@ export default function FileCard({ file, view, onClick, onRefresh, selected, onS
 
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [file.mime_type]);
+  }, [file.mime_type, file.preview_url]);
 
   useEffect(() => {
-    if (!visible || !isImage(file.mime_type)) return;
+    if (!visible || !isImage(file.mime_type) || file.preview_url) return;
 
     const param = file.thumbnail_key ? "thumbnail=true" : "preview=true";
     fetch(`/api/files/${file.id}/download?${param}`)
       .then((r) => r.json())
       .then((d) => setThumbnailUrl(d.url))
       .catch(() => {});
-  }, [visible, file.id, file.mime_type, file.thumbnail_key]);
+  }, [visible, file.id, file.mime_type, file.thumbnail_key, file.preview_url]);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();

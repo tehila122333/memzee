@@ -17,7 +17,10 @@
       "Bash(curl:*)",
       "Bash(netstat -ano)",
       "Bash(xargs -I {} taskkill //PID {} //F)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd:*)"
     ]
   }
 }

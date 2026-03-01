@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { queryD1 } from "@/lib/d1";
+import { generatePreviewPresignedUrl } from "@/lib/download";
 import type { FileRecord, FileView } from "@/types";
 
 const PAGE_SIZE = 50;
@@ -54,5 +55,19 @@ export async function GET(request: Request) {
   const files = hasMore ? rows.slice(0, PAGE_SIZE) : rows;
   const nextCursor = hasMore ? files[files.length - 1][dateField as keyof FileRecord] as string : null;
 
-  return NextResponse.json({ files, hasMore, nextCursor });
+  // Batch-generate preview URLs for all image files in parallel (local crypto op, no network)
+  const filesWithUrls = await Promise.all(
+    files.map(async (file) => {
+      if (!file.mime_type.startsWith("image/")) return file;
+      try {
+        const key = file.thumbnail_key ?? file.storage_key;
+        const preview_url = await generatePreviewPresignedUrl(key);
+        return { ...file, preview_url };
+      } catch {
+        return file;
+      }
+    })
+  );
+
+  return NextResponse.json({ files: filesWithUrls, hasMore, nextCursor });
 }

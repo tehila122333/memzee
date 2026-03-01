@@ -11,6 +11,8 @@ export interface FileRecord {
   uploaded_at: string;
   updated_at: string;
   deleted_at: string | null;
+  // Computed server-side, not stored in D1
+  preview_url?: string;
 }
 
 export interface FolderRecord {
